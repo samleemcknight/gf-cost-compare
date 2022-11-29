@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import requests
 import json
 from authenticate import Authenticate
+from models import Product
 
 
 class ProductController:
@@ -50,26 +51,26 @@ class ProductController:
     def determine_minimum_priced_product_for_location(self,
                                                       product_name: str,
                                                       zip_code: int,
-                                                      product_limit: int = 50) -> dict:
+                                                      product_limit: int = 50) -> Product:
         product_info = self.get_product_list(product_name=product_name,
                                              zip_code=zip_code,
                                              product_limit=product_limit)
         if not product_info:
-            return {}
-        large = small = product_info[0]['price']
+            return Product()
+        large = small = product_info[0].price
         min_index = 0
-        for index, price in enumerate(product_info):
-            if price['price'] > large:
-                large = price['price']
-            if price['price'] < small:
-                small = price['price']
+        for index, product in enumerate(product_info):
+            if product.price > large:
+                large = product.price
+            if product.price < small:
+                small = product.price
                 min_index = index
         return product_info[min_index]
 
     def get_product_list(self,
                          product_name: str,
                          zip_code: int,
-                         product_limit: int = 50) -> List[dict]:
+                         product_limit: int = 50) -> List[Product]:
         locations = self.get_locations(zip_code)
         location_id = locations[0]['locationId']
         products = self.get_products_from_location(filter_term=product_name,
@@ -82,14 +83,13 @@ class ProductController:
         return product_info
 
     @staticmethod
-    def get_relevant_product_data(products: List[dict]):
+    def get_relevant_product_data(products: List[dict]) -> List[Product]:
         product_info = []
         for product in products:
             if len(product['items']) == 1:
-                product_info.append({
-                    'product_id': product['productId'],
-                    'description': product['description'],
-                    'price': product['items'][0]['price']['regular'],
-                    'size': product['items'][0]['size']
-                })
+                new_product = Product(product_id=product['productId'],
+                                      description=product['description'],
+                                      price=product['items'][0]['price']['regular'],
+                                      size_string=product['items'][0]['size'])
+                product_info.append(new_product)
         return product_info

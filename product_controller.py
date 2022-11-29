@@ -1,4 +1,5 @@
 import os
+from typing import List
 from dotenv import load_dotenv
 import requests
 import json
@@ -26,18 +27,17 @@ class ProductController:
             "Authorization": f"Bearer {self.access_token}"
         })
         locations = json.loads(resp.content)
+        if not locations:
+            raise Exception(f'No locations were found for your area. Please select a wider '
+                            f'search radius than {self.search_radius_miles} miles')
         return locations['data']
 
-    def get_products(self,
-                     zip_code: int,
-                     filter_term: str):
-        locations = self.get_locations(zip_code)
-        if locations:
-            location_id = locations[0]['locationId']
-            product_url = f"{self.product_uri}?filter.term={filter_term}&" \
-                          f"filter.locationId={location_id}&filter.limit=50"
-        else:
-            product_url = f"{self.product_uri}?filter.term={filter_term}&filter.limit=50"
+    def get_products_from_location(self,
+                                   filter_term: str,
+                                   location_id: str,
+                                   product_limit: int):
+        product_url = f"{self.product_uri}?filter.term={filter_term}&" \
+                      f"filter.locationId={location_id}&filter.limit={product_limit}"
         resp = requests.get(product_url, headers={
             "Accept": "application/json",
             "Authorization": f"Bearer {self.access_token}"
@@ -47,28 +47,49 @@ class ProductController:
 
         return products['data']
 
-    def determine_minimum_priced_product(self,
-                                         generic_product_name: str,
-                                         zip_code: int):
-        products = self.get_products(zip_code=zip_code,
-                                     filter_term=generic_product_name)
+    def determine_minimum_priced_product_for_location(self,
+                                                      product_name: str,
+                                                      zip_code: int,
+                                                      product_limit: int = 50) -> dict:
+        product_info = self.get_product_list(product_name=product_name,
+                                             zip_code=zip_code,
+                                             product_limit=product_limit)
+        if not product_info:
+            return {}
+        large = small = product_info[0]['price']
+        min_index = 0
+        for index, price in enumerate(product_info):
+            if price['price'] > large:
+                large = price['price']
+            if price['price'] < small:
+                small = price['price']
+                min_index = index
+        return product_info[min_index]
+
+    def get_product_list(self,
+                         product_name: str,
+                         zip_code: int,
+                         product_limit: int = 50) -> List[dict]:
+        locations = self.get_locations(zip_code)
+        location_id = locations[0]['locationId']
+        products = self.get_products_from_location(filter_term=product_name,
+                                                   location_id=location_id,
+                                                   product_limit=product_limit)
         if not products:
             return []
+
+        product_info = self.get_relevant_product_data(products)
+        return product_info
+
+    @staticmethod
+    def get_relevant_product_data(products: List[dict]):
         product_info = []
         for product in products:
             if len(product['items']) == 1:
                 product_info.append({
                     'product_id': product['productId'],
-                    'product_description': product['description'],
-                    'product_price': product['items'][0]['price']['regular']
+                    'description': product['description'],
+                    'price': product['items'][0]['price']['regular'],
+                    'size': product['items'][0]['size']
                 })
-        large = small = product_info[0]['product_price']
-        min_index = 0
-        for index, price in enumerate(product_info):
-            if price['product_price'] > large:
-                large = price['product_price']
-            if price['product_price'] < small:
-                small = price['product_price']
-                min_index = index
-        return product_info[min_index]
-
+        return product_info

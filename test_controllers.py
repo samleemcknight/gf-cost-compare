@@ -1,5 +1,5 @@
 import json
-from controller import ProductController
+from product_controller import ProductController
 
 # grocery_file = open('./data.json')
 #
@@ -24,7 +24,13 @@ from controller import ProductController
 
 controller = ProductController(search_radius_miles=5)
 
-product = controller.determine_minimum_priced_product(generic_product_name='spaghetti',
-                                            zip_code=80123)
+product = controller.determine_minimum_priced_product_for_location(product_name='oats',
+                                                                   zip_code=80123)
 
-assert product
+print(product)
+
+product_list = controller.get_product_list(product_name='oats',
+                                           zip_code=80123,
+                                           product_limit=25)
+print('\n\n')
+print(product_list)

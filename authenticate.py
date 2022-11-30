@@ -1,7 +1,5 @@
 import os
 from datetime import datetime, timedelta
-from typing import Dict
-
 from dotenv import load_dotenv
 import requests
 import base64

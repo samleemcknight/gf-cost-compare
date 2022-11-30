@@ -46,8 +46,4 @@ jobs:
           export OAUTH_CONNECT_URI="${{secrets.OAUTH_CONNECT_URI}}"
           export PRODUCT_URI="${{secrets.PRODUCT_URI}}"
           export LOCATION_URI="${{secrets.LOCATION_URI}}"
-          echo "the client id is ${{secrets.CLIENT_ID}}"
-          echo "the oauth connect uri is ${{secrets.OAUTH_CONNECT_URI}}"
           python test_controllers.py
-#      - if: failure()
-#        run: echo "failed to run tests"

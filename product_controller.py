@@ -12,8 +12,9 @@ class ProductController:
     load_dotenv()
 
     def __init__(self,
-                 search_radius_miles: int = 10):
-        self.authentication = Authenticate()
+                 authentication: Authenticate = Authenticate(),
+                 search_radius_miles: int = 10,):
+        self.authentication = authentication
         self.access_token = self.authentication.get_auth_access_token()
         self.product_uri = os.environ.get('PRODUCT_URI')
         self.location_uri = os.environ.get('LOCATION_URI')

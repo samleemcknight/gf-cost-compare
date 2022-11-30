@@ -46,6 +46,8 @@ class Product:
             return 'oz'
         elif 'lb' in value:
             return 'lb'
+        elif 'gal' in value:
+            return 'gal'
         return None
 
     @staticmethod
@@ -55,4 +57,6 @@ class Product:
         elif 'oz' in value:
             return value.split('oz')[0]
         elif 'lb' in value:
-            return value.split('oz')[0]
+            return value.split('lb')[0]
+        elif 'gal' in value:
+            return value.split('gal')[0]

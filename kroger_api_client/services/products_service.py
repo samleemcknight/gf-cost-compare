@@ -3,17 +3,17 @@ from typing import List
 from dotenv import load_dotenv
 import requests
 import json
-from authenticate import Authenticate
+from kroger_api_client.services.authentication_service import AuthenticationService
 from models import Product
 
 
-class ProductController:
+class ProductsService:
 
     load_dotenv()
 
     def __init__(self,
-                 authentication: Authenticate = Authenticate(),
-                 search_radius_miles: int = 10,):
+                 authentication: AuthenticationService = AuthenticationService(),
+                 search_radius_miles: int = 10, ):
         self.authentication = authentication
         self.access_token = self.authentication.get_auth_access_token()
         self.product_uri = os.environ.get('PRODUCT_URI')

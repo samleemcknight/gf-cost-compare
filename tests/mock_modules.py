@@ -8,17 +8,17 @@ class MockData:
     products = mock_products
 
     def mock_product_controller(self):
-        product_controller_mock = MagicMock(name="ProductControllerMock")
+        products_service_mock = MagicMock(name="ProductsServiceMock")
 
         def patch_get_locations(location_list):
             def locations_func(*args, **kwargs):
                 return location_list
 
-            product_controller_mock.return_value.get_locations = MagicMock(side_effect=locations_func)
+            products_service_mock.return_value.get_locations = MagicMock(side_effect=locations_func)
 
-            return product_controller_mock.return_value.get_locations
+            return products_service_mock.return_value.get_locations
 
-        locations_patcher = patch('product_controller.ProductController.get_locations',
+        locations_patcher = patch('kroger_api_client.services.products_service.ProductsService.get_locations',
                                   patch_get_locations(self.locations))
         locations_patcher.start()
 
@@ -28,10 +28,10 @@ class MockData:
                     return products_list[0:kwargs['product_limit']]
                 return products_list
 
-            product_controller_mock.return_value.get_products_from_location = \
+            products_service_mock.return_value.get_products_from_location = \
                 MagicMock(side_effect=products_func)
-            return product_controller_mock.return_value.get_products_from_location
+            return products_service_mock.return_value.get_products_from_location
 
-        products_patcher = patch('product_controller.ProductController.get_products_from_location',
+        products_patcher = patch('kroger_api_client.services.products_service.ProductsService.get_products_from_location',
                                  patch_get_products_from_location(self.products))
         products_patcher.start()

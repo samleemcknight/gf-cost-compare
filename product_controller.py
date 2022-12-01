@@ -79,17 +79,17 @@ class ProductController:
         if not products:
             return []
 
-        product_info = self.get_relevant_product_data(products)
+        product_info = self.create_product_objects_from_api_response(products)
         return product_info
 
     @staticmethod
-    def get_relevant_product_data(products: List[dict]) -> List[Product]:
+    def create_product_objects_from_api_response(product_data: List[dict]) -> List[Product]:
         product_info = []
-        for product in products:
-            if len(product['items']) == 1:
-                new_product = Product(product_id=product['productId'],
-                                      description=product['description'],
-                                      price=product['items'][0]['price']['regular'],
-                                      size_string=product['items'][0]['size'])
-                product_info.append(new_product)
+        for product_dict in product_data:
+            if len(product_dict['items']) == 1:
+                product = Product(product_id=product_dict['productId'],
+                                  description=product_dict['description'],
+                                  price=product_dict['items'][0]['price']['regular'],
+                                  size_string=product_dict['items'][0]['size'])
+                product_info.append(product)
         return product_info

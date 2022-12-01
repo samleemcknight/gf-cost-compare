@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from requests import Response
 
 
-class Authenticate:
+class AuthenticationService:
     load_dotenv()
 
     def __init__(self,

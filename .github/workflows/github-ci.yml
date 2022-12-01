@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   pylint:
-    name: Pylint
+    name: Pylint and Pytest
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -23,31 +23,5 @@ jobs:
       - name: Analysing the code with pylint
         run: |
           pylint --fail-under=7 $(git ls-files '*.py')
-  pytest:
-    name: Test
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [ "3.9" ]
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      - name: Set environtment variables and run test file
-        run: |
-          export CLIENT_ID="${{secrets.CLIENT_ID}}"
-          export CLIENT_SECRET="${{secrets.CLIENT_SECRET}}"
-          export OAUTH_CONNECT_URI="${{secrets.OAUTH_CONNECT_URI}}"
-          export PRODUCT_URI="${{secrets.PRODUCT_URI}}"
-          export LOCATION_URI="${{secrets.LOCATION_URI}}"
-          echo "the client id is ${{secrets.CLIENT_ID}}"
-          echo "the oauth connect uri is ${{secrets.OAUTH_CONNECT_URI}}"
-          python test_controllers.py
-#      - if: failure()
-#        run: echo "failed to run tests"
+      - name: Run pytest suite
+        run: python -m pytest tests/

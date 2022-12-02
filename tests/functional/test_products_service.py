@@ -7,15 +7,17 @@ def test_get_access_key(mock_authentication_service):
 
 
 def test_get_locations(mock_product_control_data,
-                       products_service):
-    locations = products_service.get_locations(zip_code=80123)
+                       locations_service,
+                       products_service,
+                       mock_authentication_service):
+    locations = locations_service.get_locations(zip_code=80123)
     assert len(locations)
     assert locations[0]['chain'] == 'KROGER'
 
 
 def test_get_products_from_location(mock_product_control_data,
                                     products_service):
-    locations = products_service.get_locations(zip_code=80123)
+    locations = products_service.locations_service.get_locations(zip_code=80123)
     products = products_service.get_products_from_location(filter_term='milk',
                                                            location_id=locations[0]['locationId'],
                                                            product_limit=10)

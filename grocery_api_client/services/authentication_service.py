@@ -5,9 +5,16 @@ import requests
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from requests import Response
+from grocery_api_client.services.helpers.constants import KROGER_OAUTH_URI
 
 
 class AuthenticationService:
+    """
+    Service for authenticating to Kroger API. In order to work, you must have the following
+    valid Kroger client_id and client_secret set as API environment variables e.g.:
+    CLIENT_ID=abc1234la851
+    CLIENT_SECRET=09slae423gk5ace6yui
+    """
     load_dotenv()
 
     def __init__(self,
@@ -15,13 +22,21 @@ class AuthenticationService:
         self.client_id = os.environ.get('CLIENT_ID')
         self.client_secret = os.environ.get('CLIENT_SECRET')
         self.auth_token = f"{self.client_id}:{self.client_secret}".encode("ascii")
-        self.oauth_connect_uri = os.environ.get('OAUTH_CONNECT_URI')
+        self.oauth_connect_uri = KROGER_OAUTH_URI
         self.access_token = os.environ.get('ACCESS_TOKEN')
         self.expires_in = os.environ.get('EXPIRES_IN')
         self.scope = scope
 
     def get_auth_access_token(self,
-                              write_to_env_file: bool = False):
+                              write_to_env_file: bool = False) -> str:
+        """
+        :param write_to_env_file: for local development, if True will save non-expired access token to .env file
+        :return: string access token for accessing kroger location and product APIs
+
+        The access token will last for 30 minutes, however unless you set `write_to_env_file` to `True`, the method
+        will continue making calls to Kroger's OAuth client. In order to reduce the number of calls, add
+        ACCESS_TOKEN and EXPIRES_IN to your `.env` file (no values necessary - those will be written for you)
+        """
         if self.__is_token_still_valid():
             return self.access_token
         auth_resp = self.post_oauth()
@@ -35,6 +50,9 @@ class AuthenticationService:
             return self.access_token
 
     def post_oauth(self) -> Response:
+        """
+        :return: OAuth response
+        """
         encoded_token = base64.b64encode(self.auth_token)
         encoded_string = encoded_token.decode('ascii')
         try:
@@ -62,9 +80,9 @@ class AuthenticationService:
         access_token = auth_response['access_token']
         expires_in_seconds = auth_response['expires_in']
         expiration_time = (datetime.utcnow() + timedelta(seconds=expires_in_seconds)).isoformat()
-        with open('.env', 'r') as f:
+        with open(file='.env', mode='r', encoding="utf-8") as f:
             lines = f.readlines()
-        with open('.env', 'w') as f:
+        with open(file='.env', mode='w', encoding="utf-8") as f:
             for line in lines:
                 if 'ACCESS_TOKEN' not in line and 'EXPIRES_IN' not in line:
                     f.write(line)

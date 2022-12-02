@@ -18,12 +18,12 @@ class MockData:
 
             return products_service_mock.return_value.get_locations
 
-        locations_patcher = patch('grocery_api_client.services.products_service.ProductsService.get_locations',
+        locations_patcher = patch('grocery_api_client.services.locations_service.LocationsService.get_locations',
                                   patch_get_locations(self.locations))
         locations_patcher.start()
 
         def patch_get_products_from_location(products_list):
-            def products_func(*args, **kwargs):
+            def products_func(**kwargs):
                 if len(products_list) > kwargs['product_limit']:
                     return products_list[0:kwargs['product_limit']]
                 return products_list

@@ -1,5 +1,4 @@
 from models import Product
-from grocery_api_client.services.locations_service import LocationsService
 
 
 def test_get_access_key(mock_authentication_service):
@@ -8,10 +7,9 @@ def test_get_access_key(mock_authentication_service):
 
 
 def test_get_locations(mock_product_control_data,
+                       locations_service,
                        products_service,
                        mock_authentication_service):
-    access_token = mock_authentication_service.get_auth_access_token()
-    locations_service = LocationsService(access_token)
     locations = locations_service.get_locations(zip_code=80123)
     assert len(locations)
     assert locations[0]['chain'] == 'KROGER'

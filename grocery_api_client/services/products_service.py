@@ -2,8 +2,7 @@ from typing import List
 from dotenv import load_dotenv
 import requests
 import json
-from grocery_api_client.services.authentication_service import AuthenticationService
-from grocery_api_client.services.helpers.constants import KROGER_PRODUCTS_URI, KROGER_LOCATIONS_URI
+from grocery_api_client.services.helpers.constants import KROGER_PRODUCTS_URI
 from grocery_api_client.services.locations_service import LocationsService
 from models import Product
 
@@ -15,11 +14,9 @@ class ProductsService:
     load_dotenv()
 
     def __init__(self,
-                 authentication: AuthenticationService = AuthenticationService(),
-                 search_radius_miles: int = 10,
-                 write_to_env_file: bool = False):
-        self.authentication = authentication
-        self.access_token = self.authentication.get_auth_access_token(write_to_env_file)
+                 access_token: str,
+                 search_radius_miles: int = 10):
+        self.access_token = access_token
         self.product_uri = KROGER_PRODUCTS_URI
         self.locations_service = LocationsService(self.access_token, search_radius_miles)
 

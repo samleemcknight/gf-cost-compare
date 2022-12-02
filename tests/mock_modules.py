@@ -18,7 +18,7 @@ class MockData:
 
             return products_service_mock.return_value.get_locations
 
-        locations_patcher = patch('grocery_api_client.services.products_service.ProductsService.get_locations',
+        locations_patcher = patch('grocery_api_client.services.locations_service.LocationsService.get_locations',
                                   patch_get_locations(self.locations))
         locations_patcher.start()
 

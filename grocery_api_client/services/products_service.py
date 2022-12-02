@@ -1,43 +1,38 @@
-import os
 from typing import List
 from dotenv import load_dotenv
 import requests
 import json
 from grocery_api_client.services.authentication_service import AuthenticationService
+from grocery_api_client.services.helpers.constants import KROGER_PRODUCTS_URI, KROGER_LOCATIONS_URI
+from grocery_api_client.services.locations_service import LocationsService
 from models import Product
 
 
 class ProductsService:
-
+    """
+    Service for getting products from Kroger API
+    """
     load_dotenv()
 
     def __init__(self,
                  authentication: AuthenticationService = AuthenticationService(),
-                 search_radius_miles: int = 10, ):
+                 search_radius_miles: int = 10,
+                 write_to_env_file: bool = False):
         self.authentication = authentication
-        self.access_token = self.authentication.get_auth_access_token()
-        self.product_uri = os.environ.get('PRODUCT_URI')
-        self.location_uri = os.environ.get('LOCATION_URI')
-        self.search_radius_miles = search_radius_miles
-
-    def get_locations(self,
-                      zip_code: int):
-        location_url = f"{self.location_uri}?filter.zipCode.near={zip_code}" \
-                       f"&filter.radiusInMiles={self.search_radius_miles}"
-        resp = requests.get(location_url, headers={
-            "Accept": "application/json",
-            "Authorization": f"Bearer {self.access_token}"
-        })
-        locations = json.loads(resp.content)
-        if not locations:
-            raise Exception(f'No locations were found for your area. Please select a wider '
-                            f'search radius than {self.search_radius_miles} miles')
-        return locations['data']
+        self.access_token = self.authentication.get_auth_access_token(write_to_env_file)
+        self.product_uri = KROGER_PRODUCTS_URI
+        self.locations_service = LocationsService(self.access_token, search_radius_miles)
 
     def get_products_from_location(self,
                                    filter_term: str,
                                    location_id: str,
                                    product_limit: int):
+        """
+        :param filter_term: all lower case, no spaces string name of product
+        :param location_id: ID of store
+        :param product_limit: max number of products returned
+        :return: dictionary of products directly from Kroger Products API
+        """
         product_url = f"{self.product_uri}?filter.term={filter_term}&" \
                       f"filter.locationId={location_id}&filter.limit={product_limit}"
         resp = requests.get(product_url, headers={
@@ -53,6 +48,16 @@ class ProductsService:
                                                       product_name: str,
                                                       zip_code: int,
                                                       product_limit: int = 50) -> Product:
+        """
+        Custom method for determining the minimum priced product given a location.
+        If there are no products returned, that means that either the Kroger affiliates near you
+        do not carry the specific product, there is a type in the name, or you need to expand `search_radius_miles`
+        when you instantiate ProductsService
+        :param product_name: all lower case, no spaces name of product
+        :param zip_code: 5-digit US zip code
+        :param product_limit: max number of products returned in one request
+        :return: single Product object. (empty object if no products have been found)
+        """
         product_info = self.get_product_list(product_name=product_name,
                                              zip_code=zip_code,
                                              product_limit=product_limit)
@@ -72,7 +77,13 @@ class ProductsService:
                          product_name: str,
                          zip_code: int,
                          product_limit: int = 50) -> List[Product]:
-        locations = self.get_locations(zip_code)
+        """
+        :param product_name: all lower case, no spaces name of product
+        :param zip_code: 5-digit US zip code
+        :param product_limit: max number of products returned in one request
+        :return: list of Product objects
+        """
+        locations = self.locations_service.get_locations(zip_code)
         location_id = locations[0]['locationId']
         products = self.get_products_from_location(filter_term=product_name,
                                                    location_id=location_id,

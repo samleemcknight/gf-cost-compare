@@ -18,7 +18,7 @@ class MockData:
 
             return products_service_mock.return_value.get_locations
 
-        locations_patcher = patch('kroger_api_client.services.products_service.ProductsService.get_locations',
+        locations_patcher = patch('grocery_api_client.services.products_service.ProductsService.get_locations',
                                   patch_get_locations(self.locations))
         locations_patcher.start()
 
@@ -32,6 +32,8 @@ class MockData:
                 MagicMock(side_effect=products_func)
             return products_service_mock.return_value.get_products_from_location
 
-        products_patcher = patch('kroger_api_client.services.products_service.ProductsService.get_products_from_location',
-                                 patch_get_products_from_location(self.products))
+        products_patcher = patch(
+            'grocery_api_client.services.products_service.ProductsService.get_products_from_location',
+            patch_get_products_from_location(self.products)
+        )
         products_patcher.start()

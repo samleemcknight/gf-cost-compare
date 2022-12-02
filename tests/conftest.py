@@ -1,12 +1,12 @@
 import pytest
 from mock import patch
 
-from kroger_api_client.services.products_service import ProductsService
+from grocery_api_client.services.products_service import ProductsService
 from tests.mock_modules import MockData
 
 
 @pytest.fixture
-@patch('kroger_api_client.services.authentication_service.AuthenticationService')
+@patch('grocery_api_client.services.authentication_service.AuthenticationService')
 def mock_authentication_service(mock_authentication_service):
     return mock_authentication_service
 

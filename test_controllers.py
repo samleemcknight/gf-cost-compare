@@ -1,4 +1,4 @@
-from kroger_api_client.services.products_service import ProductsService
+from grocery_api_client.services.products_service import ProductsService
 
 controller = ProductsService(search_radius_miles=5)
 

@@ -3,7 +3,7 @@ from typing import List
 from dotenv import load_dotenv
 import requests
 import json
-from kroger_api_client.services.authentication_service import AuthenticationService
+from grocery_api_client.services.authentication_service import AuthenticationService
 from models import Product
 
 

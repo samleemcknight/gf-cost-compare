@@ -1,0 +1,40 @@
+[build-system]
+requires      = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "grocery_api_client"
+version = "1.0.0"
+description = "Provides services for interacting with Kroger APIs"
+readme = "README.md"
+authors = [{ name = "Sam McKnight", email = "samumaiviti@gmail.com" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: Apache License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["grocery", "food", "restrictions", "locations"]
+
+[tool.setuptools]
+py-modules = ["grocer_api_client"]
+
+[tool.project.dependencies]
+certifi = ">=2022.9.14"
+charset-normalizer = ">= 2.0"
+idna = "^3"
+python-dotenv = "~0.21.0"
+requests = "^2"
+urllib3 = ">=1.26.0"
+
+[tool.project.dev-dependencies]
+pytest = "^7.2"
+mock = "3.0.5"
+
+requires-python = ">=3.9"
+
+[project.urls]
+Homepage = "https://github.com/samleemcknight/gf-cost-compare"
+
+[project.scripts]
+grocery_api_client = "reader.__main__:main"

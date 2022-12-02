@@ -49,7 +49,7 @@ class ProductsService:
         Custom method for determining the minimum priced product given a location.
         If there are no products returned, that means that either the Kroger affiliates near you
         do not carry the specific product, there is a type in the name, or you need to expand `search_radius_miles`
-        when you instantiate ProductsService
+        when you instantiate ProductsService (to a maximum of 100 miles)
         :param product_name: all lower case, no spaces name of product
         :param zip_code: 5-digit US zip code
         :param product_limit: max number of products returned in one request

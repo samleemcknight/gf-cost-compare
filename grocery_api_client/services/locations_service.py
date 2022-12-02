@@ -1,6 +1,7 @@
 import json
 import requests
 from grocery_api_client.services.helpers.constants import KROGER_LOCATIONS_URI, KROGER_CHAINS_URI
+from grocery_api_client.utils.exc import LocationNotFoundException
 
 
 class LocationsService:
@@ -10,6 +11,22 @@ class LocationsService:
                  search_radius_miles: int = 10,):
         self.access_token = access_token
         self.search_radius_miles = search_radius_miles
+
+    def expand_locations_search(self,
+                                zip_code: int,
+                                expand_in_miles: int = 10):
+        try_count = 0
+        locations = []
+        while try_count <= 5 and len(locations) == 0 and self.search_radius_miles < 100:
+            locations = self.get_locations(zip_code)
+            if not locations:
+                self.search_radius_miles += expand_in_miles
+                try_count += 1
+            else:
+                return locations
+        if not locations:
+            raise LocationNotFoundException(f'No locations were found for your area '
+                                            f'with a search radius of {self.search_radius_miles} miles')
 
     def get_locations(self,
                       zip_code: int) -> [dict]:
@@ -21,8 +38,8 @@ class LocationsService:
         })
         locations_data = json.loads(resp.content)
         if not locations_data:
-            raise Exception(f'No locations were found for your area. Please select a wider '
-                            f'search radius than {self.search_radius_miles} miles')
+            raise LocationNotFoundException(f'No locations were found for your area. Please select a wider '
+                                            f'search radius than {self.search_radius_miles} miles')
         return locations_data['data']
 
     def get_location_details(self,

@@ -16,9 +16,10 @@ def mock_authentication_service(mock_authentication_service):
 def mock_access_token(mock_authentication_service):
     return mock_authentication_service.get_auth_access_token()
 
+
 @pytest.fixture
-def mock_product_control_data():
-    return MockData().mock_product_controller()
+def mock_data():
+    return MockData().mock_data()
 
 
 @pytest.fixture

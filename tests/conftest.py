@@ -1,8 +1,8 @@
 import pytest
 from mock import patch
 
-from grocery_api_client.services.products_service import ProductsService
-from grocery_api_client.services.locations_service import LocationsService
+from grocery_api_client import ProductsService
+from grocery_api_client import LocationsService
 from tests.mock_modules import MockData
 
 

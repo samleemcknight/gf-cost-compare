@@ -1,4 +1,4 @@
-from models import Product
+from grocery_api_client.models import Product
 
 
 def test_get_access_key(mock_authentication_service):

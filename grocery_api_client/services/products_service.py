@@ -4,7 +4,7 @@ import requests
 import json
 from grocery_api_client.services.helpers.constants import KROGER_PRODUCTS_URI
 from grocery_api_client.services.locations_service import LocationsService
-from models import Product
+from grocery_api_client.models import Product
 
 
 class ProductsService:

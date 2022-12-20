@@ -37,7 +37,7 @@ class AuthenticationService:
         will continue making calls to Kroger's OAuth client. In order to reduce the number of calls, add
         ACCESS_TOKEN and EXPIRES_IN to your `.env` file (no values necessary - those will be written for you)
         """
-        if self.__is_token_still_valid():
+        if write_to_env_file and self.__is_token_still_valid():
             return self.access_token
         auth_resp = self.post_oauth()
         if auth_resp.status_code != 200:
@@ -47,7 +47,7 @@ class AuthenticationService:
             self.__write_new_token_to_env_file(auth_dict)
         else:
             self.access_token = auth_dict['access_token']
-            return self.access_token
+        return self.access_token
 
     def post_oauth(self) -> Response:
         """
@@ -69,6 +69,13 @@ class AuthenticationService:
             raise Exception(f"Something went wrong when authenticating:\n{e}")
 
     def __is_token_still_valid(self) -> bool:
+        """
+        This method simply checks to see whether the expires_in ISO string is greater than
+        datetime.utcnow()
+        Note: the validation will return True if you adjust your expires_in time to the future,
+        but your API calls will return 403s.
+        :return:
+        """
         if self.access_token:
             if self.expires_in:
                 now = datetime.utcnow()

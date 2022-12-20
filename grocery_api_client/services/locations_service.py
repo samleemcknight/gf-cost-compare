@@ -1,10 +1,13 @@
 import json
 import requests
+from typing import List
+from grocery_api_client.models import Location
 from grocery_api_client.services.helpers.constants import KROGER_LOCATIONS_URI, KROGER_CHAINS_URI
 from grocery_api_client.utils.exc import LocationNotFoundException
 
 
 class LocationsService:
+    DRUG_AND_GENERAL_MERCHANDISE_ID = '23'
 
     def __init__(self,
                  access_token: str,
@@ -27,6 +30,28 @@ class LocationsService:
         if not locations:
             raise LocationNotFoundException(f'No locations were found for your area '
                                             f'with a search radius of {self.search_radius_miles} miles')
+
+    def get_location_list(self,
+                          zip_code: int) -> List[Location]:
+        locations = self.get_locations(zip_code=zip_code)
+        if locations:
+            return self.create_location_objects_from_api_response(locations)
+        return []
+
+    def get_grocery_store_locations(self,
+                                    zip_code: int) -> List[Location]:
+        locations = self.get_location_list(zip_code)
+        locations_with_grocery_stores = []
+        for location in locations:
+            if len(location.departments) > 1:
+                for department in location.departments:
+                    if department['departmentId'] == self.DRUG_AND_GENERAL_MERCHANDISE_ID:
+                        locations_with_grocery_stores.append(location)
+            elif location.departments == 1:
+                if location.departments[0]['departmentId'] == self.DRUG_AND_GENERAL_MERCHANDISE_ID:
+                    locations_with_grocery_stores.append(location)
+        return locations_with_grocery_stores
+
 
     def get_locations(self,
                       zip_code: int) -> [dict]:
@@ -74,3 +99,15 @@ class LocationsService:
         chains_data = json.loads(resp.content)
 
         return chains_data['data']
+
+    @staticmethod
+    def create_location_objects_from_api_response(location_data: List[dict]) -> List[Location]:
+        locations = []
+        for location_dict in location_data:
+            location = Location(location_id=location_dict['locationId'],
+                                name=location_dict['name'],
+                                chain=location_dict['chain'],
+                                departments=location_dict['departments'],
+                                address=location_dict['address'])
+            locations.append(location)
+        return locations

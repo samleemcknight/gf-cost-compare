@@ -93,12 +93,12 @@ class ProductsService:
 
     @staticmethod
     def create_product_objects_from_api_response(product_data: List[dict]) -> List[Product]:
-        product_info = []
+        products = []
         for product_dict in product_data:
             if len(product_dict['items']) == 1:
                 product = Product(product_id=product_dict['productId'],
                                   description=product_dict['description'],
                                   price=product_dict['items'][0]['price']['regular'],
                                   size_string=product_dict['items'][0]['size'])
-                product_info.append(product)
-        return product_info
+                products.append(product)
+        return products

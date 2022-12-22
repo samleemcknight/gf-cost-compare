@@ -25,7 +25,7 @@ product_name = 'bread'
 product_limit = 100
 
 # note that this token will only be good for 30 minutes at a time
-access_token  = AuthenticationService().get_auth_access_token()
+access_token = AuthenticationService().get_auth_access_token()
 
 products_service = ProductsService(access_token=access_token,
                                    search_radius_miles=search_radius)
@@ -44,11 +44,11 @@ products: [Product] = products_service.get_product_list(product_name=product_nam
                                                         product_limit=product_limit)
 
 # Get list of locations near you
-locations: [dict] = locations_service.get_locations(zip_code=zip_code)
+locations: [dict] = locations_service.get_locations_data(zip_code=zip_code)
 
 # Get list of products from location. This returns the raw data from the Kroger API 
-products: [dict] = products_service.get_products_from_location(filter_term=product_name,
-                                                               location_id=locations[0]['locationId'],
-                                                               product_limit=product_limit)
+products: [dict] = products_service.get_products_data_from_location(filter_term=product_name,
+                                                                    location_id=locations[0]['locationId'],
+                                                                    product_limit=product_limit)
 ```
 _Note: the API by default will return any location near you even if that is a gas station or deli_

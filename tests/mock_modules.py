@@ -20,10 +20,10 @@ class MockData:
             def locations_func(*args, **kwargs):
                 return location_list
 
-            locations_service_mock.return_value.get_locations = MagicMock(side_effect=locations_func)
-            return locations_service_mock.return_value.get_locations
+            locations_service_mock.return_value.get_locations_data = MagicMock(side_effect=locations_func)
+            return locations_service_mock.return_value.get_locations_data
 
-        locations_patcher = patch('grocery_api_client.services.locations_service.LocationsService.get_locations',
+        locations_patcher = patch('grocery_api_client.services.locations_service.LocationsService.get_locations_data',
                                   patch_get_locations(self.locations))
         locations_patcher.start()
 
@@ -36,11 +36,11 @@ class MockData:
                 location = [location for location in location_list if location['locationId'] == location_id]
                 return location[0] if location else {}
 
-            locations_service_mock.return_value.get_location_details = MagicMock(side_effect=locations_func)
-            return locations_service_mock.return_value.get_location_details
+            locations_service_mock.return_value.get_location_details_data = MagicMock(side_effect=locations_func)
+            return locations_service_mock.return_value.get_location_details_data
 
         locations_patcher = patch(
-            'grocery_api_client.services.locations_service.LocationsService.get_location_details',
+            'grocery_api_client.services.locations_service.LocationsService.get_location_details_data',
             patch_get_location_details(self.locations)
         )
         locations_patcher.start()
@@ -70,11 +70,11 @@ class MockData:
             def locations_func():
                 return chains_list
 
-            locations_service_mock.return_value.get_chains = MagicMock(side_effect=locations_func)
-            return locations_service_mock.return_value.get_chains
+            locations_service_mock.return_value.get_chains_data = MagicMock(side_effect=locations_func)
+            return locations_service_mock.return_value.get_chains_data
 
         locations_patcher = patch(
-            'grocery_api_client.services.locations_service.LocationsService.get_chains',
+            'grocery_api_client.services.locations_service.LocationsService.get_chains_data',
             patch_get_chains(self.chains)
         )
         locations_patcher.start()
@@ -88,12 +88,12 @@ class MockData:
                     return products_list[0:kwargs['product_limit']]
                 return products_list
 
-            products_service_mock.return_value.get_products_from_location = \
+            products_service_mock.return_value.get_products_data_from_location = \
                 MagicMock(side_effect=products_func)
-            return products_service_mock.return_value.get_products_from_location
+            return products_service_mock.return_value.get_products_data_from_location
 
         products_patcher = patch(
-            'grocery_api_client.services.products_service.ProductsService.get_products_from_location',
+            'grocery_api_client.services.products_service.ProductsService.get_products_data_from_location',
             patch_get_products_from_location(self.products)
         )
         products_patcher.start()

@@ -3,7 +3,7 @@ import requests
 from typing import List, Union
 from grocery_api_client.models import Location
 from grocery_api_client.services.helpers.constants import KROGER_LOCATIONS_URI, KROGER_CHAINS_URI
-from grocery_api_client.services.helpers.helpers import create_location_objects_from_api_response
+from grocery_api_client.services.helpers.helpers import create_location_objects_from_api_response, return_or_raise
 from grocery_api_client.utils.exc import LocationNotFoundException, SearchRadiusException
 
 
@@ -39,27 +39,24 @@ class LocationsService:
         return locations[0] if locations else None
 
     def expand_locations_search(self,
-                                zip_code: int,
-                                expand_in_miles: int = 10):
+                                zip_code: int):
         try_count = 0
         locations = []
         while try_count <= 10 and len(locations) == 0 and self.search_radius_miles <= 100:
             locations = self.get_locations(zip_code)
             if not locations:
-                self.search_radius_miles += expand_in_miles
+                self.search_radius_miles += 10
                 try_count += 1
-            else:
-                return locations
-        if not locations:
-            raise LocationNotFoundException(f'No locations were found for your area '
-                                            f'with a search radius of {self.search_radius_miles} miles')
+        return return_or_raise(return_object=locations,
+                               exception=LocationNotFoundException,
+                               exception_message=f'No locations were found for your area '
+                                                 f'with a search radius of {self.search_radius_miles} miles')
 
     def get_grocery_store_locations(self,
                                     zip_code: int,
-                                    expand_locations_search: bool = False,
-                                    expand_in_miles: int = 10) -> List[Location]:
+                                    expand_locations_search: bool = False) -> List[Location]:
         if expand_locations_search:
-            locations = self.expand_locations_search(zip_code, expand_in_miles)
+            locations = self.expand_locations_search(zip_code)
         else:
             locations = self.get_locations(zip_code)
         locations_with_grocery_stores = []
@@ -68,18 +65,19 @@ class LocationsService:
                 for department in location.departments:
                     if location.departments and department['departmentId'] == self.DRUG_AND_GENERAL_MERCHANDISE_ID:
                         locations_with_grocery_stores.append(location)
-            elif location.departments == 1:
+            elif len(location.departments) == 1:
                 if location.departments[0]['departmentId'] == self.DRUG_AND_GENERAL_MERCHANDISE_ID:
                     locations_with_grocery_stores.append(location)
-        return locations_with_grocery_stores
+        return return_or_raise(return_object=locations_with_grocery_stores,
+                               exception=LocationNotFoundException,
+                               exception_message=f'No locations were found for your area '
+                                                 f'with a search radius of {self.search_radius_miles} miles')
 
     def get_grocery_store_location(self,
                                    zip_code: int,
-                                   expand_location_search: bool = False,
-                                   expand_in_miles: int = 10) -> Union[Location, None]:
+                                   expand_location_search: bool = False) -> Union[Location, None]:
         locations = self.get_grocery_store_locations(zip_code=zip_code,
-                                                     expand_locations_search=expand_location_search,
-                                                     expand_in_miles=expand_in_miles)
+                                                     expand_locations_search=expand_location_search)
         return locations[0] if locations else None
 
     def get_locations_data(self,
@@ -91,10 +89,10 @@ class LocationsService:
             "Authorization": f"Bearer {self.access_token}"
         })
         locations_data = json.loads(resp.content)
-        if not locations_data:
-            raise LocationNotFoundException(f'No locations were found for your area. Please select a wider '
-                                            f'search radius than {self.search_radius_miles} miles')
-        return locations_data['data']
+        return return_or_raise(return_object=locations_data.get('data'),
+                               exception=LocationNotFoundException,
+                               exception_message=f'No locations were found for your area. Please select a wider '
+                                                 f'search radius than {self.search_radius_miles} miles')
 
     def get_location_details_data(self,
                                   location_id: str) -> dict:

@@ -24,3 +24,11 @@ def create_location_objects_from_api_response(location_data: List[dict]) -> List
                             address=location_dict['address'])
         locations.append(location)
     return locations
+
+
+def return_or_raise(return_object,
+                    exception,
+                    exception_message: str = None):
+    if return_object:
+        return return_object
+    raise exception(exception_message)

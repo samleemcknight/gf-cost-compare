@@ -6,8 +6,8 @@ def test_get_access_key(mock_authentication_service):
     assert token
 
 
-def test_get_products_from_location(mock_data,
-                                    products_service):
+def test_get_products_data_from_location(mock_data,
+                                         products_service):
     locations = products_service.locations_service.get_locations_data(zip_code=80123)
     products = products_service.get_products_data_from_location(filter_term='milk',
                                                                 location_id=locations[0]['locationId'],

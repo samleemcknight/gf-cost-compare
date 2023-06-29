@@ -12,7 +12,7 @@ mock_locations = [
         "phone": "5551234567",
         "departments": [
             {
-                "departmentId": "01",
+                "departmentId": "23",
                 "name": "Drug & General Merchandise",
                 "phone": "5551234567",
                 "hours": {
